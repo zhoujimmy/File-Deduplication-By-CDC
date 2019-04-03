@@ -22,4 +22,4 @@ public static String downDir = "C:\\Users\\79806\\Desktop\\下载文件\\";
 
 2019.3.30 将SrcretCodeUtil上传
 
-2019.4.3 使用RedisPool取Redis连接
+2019.4.3 使用RedisPool，以及db.properties

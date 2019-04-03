@@ -17,7 +17,7 @@ public class test {
 	public static Logger logger = Logger.getLogger(test.class);
 
 	// 预先清空数据库和文件夹
-	public static void clean() {
+	public static void clean(){
 		Jedis redis = RedisUtil.getRedisFromPool();
 		redis.flushDB();
 		redis.close();
