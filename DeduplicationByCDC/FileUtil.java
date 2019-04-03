@@ -14,13 +14,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import redis.clients.jedis.Jedis;
-import testForLength.SecretCodeUtil;
+
 /**
  * 
  * @author Zhou Jimmy
  * @email zhoujimmy@yeah.net
- * @version 2019年3月21日下午3:44:50
- * 文件去重工具类
+ * @version 2019年3月21日下午3:44:50 文件去重工具类
  */
 public class FileUtil {
 	// 记录日志
@@ -86,7 +85,7 @@ public class FileUtil {
 			threadPool = new ThreadPoolExecutor(threadNum, threadNum * 3, 1, TimeUnit.SECONDS,
 					new ArrayBlockingQueue<Runnable>(partNum + 1));
 			// 创建数据库连接池
-			RedisUtil.genRedis(threadNum);
+			// RedisUtil.genRedis(threadNum);
 			// 多线程执行拆分任务
 			for (int i = 0; i < partNum; i++) {
 				threadPool.execute(new SplitRunnable(file, partSize * i, partSize, record, secretFileName, i));
@@ -101,7 +100,7 @@ public class FileUtil {
 			threadPool = new ThreadPoolExecutor(threadNum, threadNum, 1, TimeUnit.SECONDS,
 					new ArrayBlockingQueue<Runnable>(threadNum));
 			// 创建数据库连接池
-			RedisUtil.genRedis(threadNum);
+			// RedisUtil.genRedis(threadNum);
 			r = (int) (fileLength % threadNum);
 			for (int i = 0; i < threadNum - 1; i++) {
 				threadPool.execute(new SplitRunnable(file, partSize * i, partSize, record, secretFileName, i));
@@ -121,7 +120,7 @@ public class FileUtil {
 			threadPool = new ThreadPoolExecutor(threadNum, threadNum, 1, TimeUnit.SECONDS,
 					new ArrayBlockingQueue<Runnable>(threadNum));
 			// 创建数据库连接池
-			RedisUtil.genRedis(threadNum);
+			// RedisUtil.genRedis(threadNum);
 			// 开始任务
 			threadPool.execute(new SplitRunnable(file, 0, fileLength, record, secretFileName, 0));
 
@@ -148,7 +147,7 @@ public class FileUtil {
 				allNum += record[i];
 		}
 		// 将文件的长度一并写入数据库，便于恢复
-		Jedis redis = RedisUtil.getRedis();
+		Jedis redis = RedisUtil.getRedisFromPool();
 		redis.set(secretFileName + "-length", fileLength + "");
 		long t2 = System.currentTimeMillis();
 		// 去重率
@@ -173,8 +172,7 @@ public class FileUtil {
 		// 记录时间
 		long t1 = System.currentTimeMillis();
 		// 得到数据库的数据集合
-		RedisUtil.genRedis(1);
-		Jedis redis = RedisUtil.getRedis();
+		Jedis redis = RedisUtil.getRedisFromPool();
 		Set<String> keys = redis.keys(secretFileName + "*");
 		// 开启的多线程数量为
 		int keySize = keys.size();
@@ -201,7 +199,7 @@ public class FileUtil {
 				files[i] = new File(partDir + parts[i]);
 			threadPool.execute(new MergeRunnable(mergeFile, start, files));
 		}
-		RedisUtil.closeRedis();
+		redis.close();
 		// main线程等待任务线程完成
 		threadPool.shutdown();
 		try {
@@ -227,8 +225,7 @@ public class FileUtil {
 		// 记录时间
 		long t1 = System.currentTimeMillis();
 		// 得到数据库的数据集合
-		RedisUtil.genRedis(1);
-		Jedis redis = RedisUtil.getRedis();
+		Jedis redis = RedisUtil.getRedisFromPool();
 		Set<String> keys = redis.keys(secretFileName + "*");
 		// 开启的多线程数量为
 		int keySize = keys.size();
@@ -237,7 +234,7 @@ public class FileUtil {
 		ThreadPoolExecutor threadPool = new ThreadPoolExecutor(threadNum, threadNum * 3, 1, TimeUnit.SECONDS,
 				new ArrayBlockingQueue<Runnable>(keySize));
 		// 创建数据库连接池
-		RedisUtil.genRedis(threadNum);
+		// RedisUtil.genRedis(threadNum);
 		// 遍历文件块进行删除
 		int[] record = new int[keySize * 2];
 		int index = 0;
@@ -397,7 +394,7 @@ public class FileUtil {
 		String secretCode = SecretCodeUtil.md5(buf, md5);
 		// 记录数据以及起始位置
 		secretCodes.add(secretCode);
-		Jedis redis = RedisUtil.getRedis();
+		Jedis redis = RedisUtil.getRedisFromPool();
 		String value = redis.get("part-" + secretCode);
 		// 若存在，则不用写，引用次数+1即可
 		if (value != null)
@@ -412,7 +409,7 @@ public class FileUtil {
 			os.close();
 			result = true;
 		}
-		RedisUtil.setRedis(redis);
+		redis.close();
 		return result;
 	}
 

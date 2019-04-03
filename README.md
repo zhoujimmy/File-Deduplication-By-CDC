@@ -16,8 +16,10 @@ public static String downDir = "C:\\Users\\79806\\Desktop\\下载文件\\";
 
 本系统只有上传、还原和删除三项功能。并不完善，欢迎大家参考，提出建议。
 
-语言Java，数据库Redis，外加log4j和jedis两个Jar包即可运行项目。
+语言Java，数据库Redis，jar包：log4j,jedis,commons-pool2。
 
 2019.3.21 上传功能代码
 
 2019.3.30 将SrcretCodeUtil上传
+
+2019.4.3 使用RedisPool取Redis连接

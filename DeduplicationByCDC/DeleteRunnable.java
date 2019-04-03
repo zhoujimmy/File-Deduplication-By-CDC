@@ -27,7 +27,7 @@ public class DeleteRunnable implements Runnable {
 
 	public void run() {
 		// 得到数据库连接
-		Jedis redis = RedisUtil.getRedis();
+		Jedis redis = RedisUtil.getRedisFromPool();
 		// 对value进行拆分，得到数据库集合
 		String[] parts = redis.get(key).split(",");
 		// 删除数据库数据
@@ -53,7 +53,7 @@ public class DeleteRunnable implements Runnable {
 				redis.set("part-" + part, new Integer(value) - 1 + "");
 		}
 		// 将数据库连接归还
-		RedisUtil.setRedis(redis);
+		redis.close();
 	}
 
 }

@@ -18,8 +18,7 @@ public class test {
 
 	// 预先清空数据库和文件夹
 	public static void clean() {
-		Jedis redis = new Jedis("localhost");
-		redis.auth("1997997");
+		Jedis redis = RedisUtil.getRedisFromPool();
 		redis.flushDB();
 		redis.close();
 		System.out.println("数据库清空成功");

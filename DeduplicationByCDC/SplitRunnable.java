@@ -7,7 +7,6 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 
 import redis.clients.jedis.Jedis;
-import testForLength.SecretCodeUtil;
 
 /**
  * 
@@ -86,9 +85,9 @@ public class SplitRunnable implements Runnable {
 			StringBuilder builder = new StringBuilder();
 			for (String value : secretCodes)
 				builder.append(value + ",");
-			Jedis redis = RedisUtil.getRedis();
+			Jedis redis = RedisUtil.getRedisFromPool();
 			redis.set(fileKey, builder.toString());
-			RedisUtil.setRedis(redis);
+			redis.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
